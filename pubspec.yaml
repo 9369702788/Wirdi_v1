@@ -1,0 +1,35 @@
+name: wirdi
+description: "وردي — Islamic Apple Health. Daily Quran, Azkar, Prayer & Tasbeeh companion."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Cairo / IBM Plex Arabic per the Wirdi design brief.
+  # Font files are not bundled in this scaffold (network in the build
+  # sandbox that generated this project could not reach Google Fonts).
+  # To enable, drop the .ttf files under assets/fonts/ and uncomment:
+  #
+  # fonts:
+  #   - family: Cairo
+  #     fonts:
+  #       - asset: assets/fonts/Cairo-Regular.ttf
+  #       - asset: assets/fonts/Cairo-Bold.ttf
+  #         weight: 700
+  #
+  # assets:
+  #   - assets/fonts/
