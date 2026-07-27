@@ -1,11 +1,10 @@
 name: wirdi
-description: "وردي — Islamic Apple Health. Daily Quran, Azkar, Prayer & Tasbeeh companion."
+description: "وردي — Islamic daily Quran, Azkar, Prayer & Tasbeeh companion."
 publish_to: 'none'
-
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -14,13 +13,24 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  cupertino_icons: ^1.0.6
+  cupertino_icons: ^1.0.8
+
+  http: ^1.2.2
+  shared_preferences: ^2.3.3
+  just_audio: ^0.10.4
+  audio_session: ^0.1.21
+  intl: ^0.20.2
+  adhan: ^2.0.0
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/data/
