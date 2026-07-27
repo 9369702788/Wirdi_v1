@@ -1,52 +1,94 @@
-
 import 'package:flutter/material.dart';
 
-class QuranScreen extends StatelessWidget {
+class QuranScreen extends StatefulWidget {
   const QuranScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final surahs = [
-      "الفاتحة",
-      "البقرة",
-      "آل عمران",
-      "النساء",
-      "المائدة",
-      "الأنعام",
-      "الأعراف",
-      "الأنفال",
-      "التوبة",
-      "يونس",
-      "هود",
-      "يوسف",
-      "الرعد",
-      "إبراهيم",
-      "الحجر",
-      "النحل",
-      "الإسراء",
-      "الكهف",
-    ];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("القرآن الكريم"),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        itemCount: surahs.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: CircleAvatar(
-              child: Text("${index + 1}"),
-            ),
-            title: Text(
-              surahs[index],
-              textAlign: TextAlign.right,
-            ),
-            trailing: const Icon(Icons.menu_book),
-          );
-        },
-      ),
-    );
-  }
+  State<QuranScreen> createState() => _QuranScreenState();
 }
+
+class _QuranScreenState extends State<QuranScreen> {
+  final TextEditingController _searchController =
+      TextEditingController();
+
+  final List<Map<String, dynamic>> surahs = const [
+    {"id": 1, "name": "الفاتحة"},
+    {"id": 2, "name": "البقرة"},
+    {"id": 3, "name": "آل عمران"},
+    {"id": 4, "name": "النساء"},
+    {"id": 5, "name": "المائدة"},
+    {"id": 6, "name": "الأنعام"},
+    {"id": 7, "name": "الأعراف"},
+    {"id": 8, "name": "الأنفال"},
+    {"id": 9, "name": "التوبة"},
+    {"id": 10, "name": "يونس"},
+    {"id": 11, "name": "هود"},
+    {"id": 12, "name": "يوسف"},
+    {"id": 13, "name": "الرعد"},
+    {"id": 14, "name": "إبراهيم"},
+    {"id": 15, "name": "الحجر"},
+    {"id": 16, "name": "النحل"},
+    {"id": 17, "name": "الإسراء"},
+    {"id": 18, "name": "الكهف"},
+    {"id": 19, "name": "مريم"},
+    {"id": 20, "name": "طه"},
+    {"id": 21, "name": "الأنبياء"},
+    {"id": 22, "name": "الحج"},
+    {"id": 23, "name": "المؤمنون"},
+    {"id": 24, "name": "النور"},
+    {"id": 25, "name": "الفرقان"},
+    {"id": 26, "name": "الشعراء"},
+    {"id": 27, "name": "النمل"},
+    {"id": 28, "name": "القصص"},
+    {"id": 29, "name": "العنكبوت"},
+    {"id": 30, "name": "الروم"},
+    {"id": 31, "name": "لقمان"},
+    {"id": 32, "name": "السجدة"},
+    {"id": 33, "name": "الأحزاب"},
+    {"id": 34, "name": "سبأ"},
+    {"id": 35, "name": "فاطر"},
+    {"id": 36, "name": "يس"},
+    {"id": 37, "name": "الصافات"},
+    {"id": 38, "name": "ص"},
+    {"id": 39, "name": "الزمر"},
+    {"id": 40, "name": "غافر"},
+    {"id": 41, "name": "فصلت"},
+    {"id": 42, "name": "الشورى"},
+    {"id": 43, "name": "الزخرف"},
+    {"id": 44, "name": "الدخان"},
+    {"id": 45, "name": "الجاثية"},
+    {"id": 46, "name": "الأحقاف"},
+    {"id": 47, "name": "محمد"},
+    {"id": 48, "name": "الفتح"},
+    {"id": 49, "name": "الحجرات"},
+    {"id": 50, "name": "ق"},
+    {"id": 51, "name": "الذاريات"},
+    {"id": 52, "name": "الطور"},
+    {"id": 53, "name": "النجم"},
+    {"id": 54, "name": "القمر"},
+    {"id": 55, "name": "الرحمن"},
+    {"id": 56, "name": "الواقعة"},
+    {"id": 57, "name": "الحديد"},
+    {"id": 58, "name": "المجادلة"},
+    {"id": 59, "name": "الحشر"},
+    {"id": 60, "name": "الممتحنة"},
+    {"id": 61, "name": "الصف"},
+    {"id": 62, "name": "الجمعة"},
+    {"id": 63, "name": "المنافقون"},
+    {"id": 64, "name": "التغابن"},
+    {"id": 65, "name": "الطلاق"},
+    {"id": 66, "name": "التحريم"},
+    {"id": 67, "name": "الملك"},
+    {"id": 68, "name": "القلم"},
+    {"id": 69, "name": "الحاقة"},
+    {"id": 70, "name": "المعارج"},
+    {"id": 71, "name": "نوح"},
+    {"id": 72, "name": "الجن"},
+    {"id": 73, "name": "المزمل"},
+    {"id": 74, "name": "المدثر"},
+    {"id": 75, "name": "القيامة"},
+    {"id": 76, "name": "الإنسان"},
+    {"id": 77, "name": "المرسلات"},
+    {"id": 78, "name": "النبأ"},
+    {"id": 79, "name": "النازعات"},
+   
