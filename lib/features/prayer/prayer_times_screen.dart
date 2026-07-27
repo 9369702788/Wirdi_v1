@@ -1,84 +1,144 @@
 import 'package:flutter/material.dart';
+import 'package:adhan/adhan.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../core/theme/app_theme.dart';
 
-class _Prayer {
-  final String name;
-  final String time;
-  final bool isNext;
-  const _Prayer(this.name, this.time, {this.isNext = false});
-}
-
-const _prayers = [
-  _Prayer('الفجر', '04:32'),
-  _Prayer('الظهر', '12:14'),
-  _Prayer('العصر', '15:47', isNext: true),
-  _Prayer('المغرب', '19:02'),
-  _Prayer('العشاء', '20:31'),
-];
-
-/// Screen 14 — Prayer Times: next prayer, countdown, five prayers grid,
-/// calculation method settings entry point.
-class PrayerTimesScreen extends StatelessWidget {
+class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('مواقيت الصلاة'),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.tune),
-            tooltip: 'طريقة الحساب',
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryEmerald, Color(0xFF115E56)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: const Column(
-              children: [
-                Text('العصر', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700)),
-                SizedBox(height: 8),
-                Text('01:42:10', style: TextStyle(color: AppColors.goldAccent, fontSize: 20, letterSpacing: 2)),
-                SizedBox(height: 4),
-                Text('الوقت المتبقي', style: TextStyle(color: Colors.white70)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          ..._prayers.map((p) => Card(
-                color: p.isNext
-                    ? AppColors.primaryEmerald.withOpacity(0.08)
-                    : null,
-                child: ListTile(
-                  leading: Icon(
-                    Icons.mosque_outlined,
-                    color: p.isNext ? AppColors.primaryEmerald : AppColors.mutedText,
-                  ),
-                  title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                  trailing: Text(
-                    p.time,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: p.isNext ? AppColors.primaryEmerald : null,
-                    ),
-                  ),
-                ),
-              )),
-        ],
-      ),
-    );
-  }
+  State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
+
+class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
+  bool _loading = true;
+
+  String _city = "موقعي الحالي";
+
+  final List<_PrayerItem> _prayers = [];
+
+  String _nextPrayer = "...";
+
+  String _countDown = "...";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrayerTimes();
+  }
+
+  Future<void> _loadPrayerTimes() async {
+    try {
+      final position =
+          await Geolocator.getCurrentPosition();
+
+      final coordinates = Coordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      final params =
+          CalculationMethod.egyptian.getParameters();
+
+      final date = DateComponents.from(
+        DateTime.now(),
+      );
+
+      final prayerTimes = PrayerTimes(
+        coordinates,
+        date,
+        params,
+      );
+
+      final prayers = [
+        _PrayerItem(
+          "الفجر",
+          _format(prayerTimes.fajr),
+        ),
+        _PrayerItem(
+          "الظهر",
+          _format(prayerTimes.dhuhr),
+        ),
+        _PrayerItem(
+          "العصر",
+          _format(prayerTimes.asr),
+        ),
+        _PrayerItem(
+          "المغرب",
+          _format(prayerTimes.maghrib),
+        ),
+        _PrayerItem(
+          "العشاء",
+          _format(prayerTimes.isha),
+        ),
+      ];
+
+      Prayer? next =
+          prayerTimes.nextPrayer();
+
+      String nextName = "لا يوجد";
+
+      DateTime? nextTime;
+
+      if (next == Prayer.fajr) {
+        nextName = "الفجر";
+        nextTime = prayerTimes.fajr;
+      }
+
+      if (next == Prayer.dhuhr) {
+        nextName = "الظهر";
+        nextTime = prayerTimes.dhuhr;
+      }
+
+      if (next == Prayer.asr) {
+        nextName = "العصر";
+        nextTime = prayerTimes.asr;
+      }
+
+      if (next == Prayer.maghrib) {
+        nextName = "المغرب";
+        nextTime = prayerTimes.maghrib;
+      }
+
+      if (next == Prayer.isha) {
+        nextName = "العشاء";
+        nextTime = prayerTimes.isha;
+      }
+
+      final remain =
+          nextTime!.difference(DateTime.now());
+
+      final h =
+          remain.inHours.toString().padLeft(2, "0");
+
+      final m = (remain.inMinutes % 60)
+          .toString()
+          .padLeft(2, "0");
+
+      final s = (remain.inSeconds % 60)
+          .toString()
+          .padLeft(2, "0");
+
+      setState(() {
+        _prayers.clear();
+        _prayers.addAll(prayers);
+
+        _nextPrayer = nextName;
+
+        _countDown = "$h:$m:$s";
+
+        _loading = false;
+      });
+    } catch (_) {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  String _format(DateTime date) {
+    final hh =
+        date.hour.toString().padLeft(2, '0');
+
+    final mm =
+        date.minute.
