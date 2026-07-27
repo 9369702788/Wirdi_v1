@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,9 +65,9 @@ class _QuranScreenState extends State<QuranScreen> {
 
             return surah.name.contains(query) ||
                 surah.number.toString() == query ||
-                surah.transliteration
-                    .toLowerCase()
-                    .contains(query.toLowerCase());
+                surah.transliteration.toLowerCase().contains(
+                      query.toLowerCase(),
+                    );
           }).toList();
 
           return Column(
@@ -163,13 +162,12 @@ class SurahReaderScreen extends StatefulWidget {
 }
 
 class _SurahReaderScreenState extends State<SurahReaderScreen> {
-  final AudioPlayer _player = AudioPlayer();
-  int? _playingAyah;
+  final Set<int> _favoriteAyahs = {};
 
   @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadFavorites();
   }
 
   Future<void> _saveLastReading(int ayahNumber) async {
@@ -191,58 +189,37 @@ class _SurahReaderScreenState extends State<SurahReaderScreen> {
     );
   }
 
-  Future<void> _playAyah(int ayahNumber) async {
-    final url = AppSources.ayahAudioUrl(
-      surahNumber: widget.surah.number,
-      ayahNumber: ayahNumber,
-    );
+  Future<void> _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
 
-    try {
-      await _saveLastReading(ayahNumber);
+    final key = 'favorite_ayahs_${widget.surah.number}';
+    final saved = prefs.getStringList(key) ?? [];
 
-      if (_playingAyah == ayahNumber) {
-        await _player.stop();
-
-        if (mounted) {
-          setState(() {
-            _playingAyah = null;
-          });
-        }
-
-        return;
-      }
-
-      if (mounted) {
-        setState(() {
-          _playingAyah = ayahNumber;
-        });
-      }
-
-      await _player.stop();
-      await _player.play(
-        UrlSource(url),
+    setState(() {
+      _favoriteAyahs.clear();
+      _favoriteAyahs.addAll(
+        saved.map((e) => int.tryParse(e) ?? 0).where((e) => e > 0),
       );
+    });
+  }
 
-      _player.onPlayerComplete.listen((_) {
-        if (mounted) {
-          setState(() {
-            _playingAyah = null;
-          });
-        }
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _playingAyah = null;
-        });
+  Future<void> _toggleFavorite(int ayahNumber) async {
+    final prefs = await SharedPreferences.getInstance();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تعذر تشغيل الصوت. تأكد من اتصال الإنترنت.'),
-          ),
-        );
+    setState(() {
+      if (_favoriteAyahs.contains(ayahNumber)) {
+        _favoriteAyahs.remove(ayahNumber);
+      } else {
+        _favoriteAyahs.add(ayahNumber);
       }
-    }
+    });
+
+    final key = 'favorite_ayahs_${widget.surah.number}';
+
+    await prefs.setStringList(
+      key,
+      _favoriteAyahs.map((e) => e.toString()).toList(),
+    );
   }
 
   Future<void> _bookmark(int ayahNumber) async {
@@ -306,7 +283,7 @@ class _SurahReaderScreenState extends State<SurahReaderScreen> {
           ),
           const SizedBox(height: 16),
           ...surah.ayahs.map((ayah) {
-            final isPlaying = _playingAyah == ayah.number;
+            final isFavorite = _favoriteAyahs.contains(ayah.number);
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
@@ -330,23 +307,24 @@ class _SurahReaderScreenState extends State<SurahReaderScreen> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            _playAyah(ayah.number);
-                          },
-                          icon: Icon(
-                            isPlaying
-                                ? Icons.stop_circle
-                                : Icons.play_circle_fill,
-                            size: 34,
-                            color: const Color(0xFF0F766E),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
                             _bookmark(ayah.number);
                           },
                           icon: const Icon(
                             Icons.bookmark_border,
                             color: Color(0xFF64748B),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _toggleFavorite(ayah.number);
+                          },
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite
+                                ? const Color(0xFFD4AF37)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                         const Spacer(),
