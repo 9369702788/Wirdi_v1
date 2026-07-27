@@ -16,12 +16,12 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int _index = 0;
 
-  static const List<Widget> _screens = [
-    HomeDashboardScreen(),
-    QuranScreen(),
-    AzkarScreen(),
-    PrayerTimesScreen(),
-    TasbeehScreen(),
+  static final List<Widget> _screens = [
+    const HomeDashboardScreen(),
+    const QuranScreen(),
+    const AzkarScreen(),
+    const PrayerTimesScreen(),
+    const TasbeehScreen(),
   ];
 
   @override
@@ -33,7 +33,11 @@ class _RootShellState extends State<RootShell> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        onTap: (i) {
+          setState(() {
+            _index = i;
+          });
+        },
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
@@ -56,4 +60,13 @@ class _RootShellState extends State<RootShell> {
             activeIcon: Icon(Icons.access_time_filled),
             label: 'الصلاة',
           ),
-          
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fingerprint),
+            activeIcon: Icon(Icons.fingerprint),
+            label: 'التسبيح',
+          ),
+        ],
+      ),
+    );
+  }
+}
