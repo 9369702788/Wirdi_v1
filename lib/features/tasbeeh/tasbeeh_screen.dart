@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/theme/app_theme.dart';
 
-/// Screen 13 — Tasbeeh: minimal digital counter with haptic feedback
-/// and daily/total stats.
 class TasbeehScreen extends StatefulWidget {
   const TasbeehScreen({super.key});
 
@@ -13,110 +13,211 @@ class TasbeehScreen extends StatefulWidget {
 
 class _TasbeehScreenState extends State<TasbeehScreen> {
   int _count = 0;
-  int _total = 128;
+  int _total = 0;
 
-  void _increment() {
+  String _selectedZekr = "سبحان الله";
+
+  int _target = 33;
+
+  final List<String> _azkar = [
+    "سبحان الله",
+    "الحمد لله",
+    "الله أكبر",
+    "لا إله إلا الله",
+    "أستغفر الله",
+    "سبحان الله وبحمده",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _count = prefs.getInt('tasbeeh_count') ?? 0;
+      _total = prefs.getInt('tasbeeh_total') ?? 0;
+
+      _selectedZekr =
+          prefs.getString('tasbeeh_zekr') ??
+              "سبحان الله";
+
+      _target =
+          prefs.getInt('tasbeeh_target') ?? 33;
+    });
+  }
+
+  Future<void> _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setInt('tasbeeh_count', _count);
+    await prefs.setInt('tasbeeh_total', _total);
+
+    await prefs.setString(
+      'tasbeeh_zekr',
+      _selectedZekr,
+    );
+
+    await prefs.setInt(
+      'tasbeeh_target',
+      _target,
+    );
+  }
+
+  Future<void> _increment() async {
     HapticFeedback.mediumImpact();
+
     setState(() {
       _count++;
       _total++;
     });
+
+    if (_count == _target) {
+      HapticFeedback.heavyImpact();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "✅ تم الوصول إلى $_target",
+            ),
+          ),
+        );
+      }
+    }
+
+    await _saveData();
   }
 
-  void _reset() {
+  Future<void> _reset() async {
     HapticFeedback.selectionClick();
-    setState(() => _count = 0);
+
+    setState(() {
+      _count = 0;
+    });
+
+    await _saveData();
+  }
+
+  Future<void> _changeTarget(int value) async {
+    setState(() {
+      _target = value;
+    });
+
+    await _saveData();
+  }
+
+  Future<void> _changeZekr(String value) async {
+    setState(() {
+      _selectedZekr = value;
+    });
+
+    await _saveData();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    final progress =
+        (_count / _target).clamp(0.0, 1.0);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('التسبيح'),
+        title: const Text("التسبيح"),
+        centerTitle: true,
         actions: [
-          IconButton(onPressed: _reset, icon: const Icon(Icons.refresh)),
+          IconButton(
+            onPressed: _reset,
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: Column(
         children: [
+
           Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _StatChip(label: 'اليوم', value: '$_count'),
-                _StatChip(label: 'الإجمالي', value: '$_total'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: GestureDetector(
-                onTap: _increment,
-                child: AnimatedScale(
-                  scale: 1.0,
-                  duration: const Duration(milliseconds: 100),
-                  child: Container(
-                    width: 220,
-                    height: 220,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primaryEmerald, Color(0xFF115E56)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryEmerald.withOpacity(0.35),
-                          blurRadius: 30,
-                          offset: const Offset(0, 12),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      '$_count',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 56,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
+            padding: const EdgeInsets.all(15),
+            child: DropdownButtonFormField<String>(
+              value: _selectedZekr,
+              items: _azkar.map((e) {
+                return DropdownMenuItem(
+                  value: e,
+                  child: Text(e),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  _changeZekr(value);
+                }
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: "الذكر",
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(bottom: 32),
-            child: Text('اضغط للتسبيح', style: TextStyle(color: AppColors.mutedText)),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 15,
+            ),
+            child: Row(
+              children: [
+
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        _changeTarget(33),
+                    child: const Text("33"),
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        _changeTarget(100),
+                    child: const Text("100"),
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () =>
+                        _changeTarget(1000),
+                    child: const Text("1000"),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
-  }
-}
 
-class _StatChip extends StatelessWidget {
-  final String label;
-  final String value;
-  const _StatChip({required this.label, required this.value});
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+              children: [
+                _StatChip(
+                  label: 'اليوم',
+                  value: '$_count',
+                ),
+                _StatChip(
+                  label: 'الإجمالي',
+                  value: '$_total',
+                ),
+              ],
+            ),
+          ),
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.primaryEmerald.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
-          Text(label, style: const TextStyle(color: AppColors.mutedText, fontSize: 12)),
-        ],
-      ),
-    );
-  }
-}
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+            ),
+            child: 
