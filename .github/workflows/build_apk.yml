@@ -3,7 +3,9 @@ name: Build Wirdi Test APK
 on:
   push:
     branches: [ main, master ]
+
   pull_request:
+
   workflow_dispatch:
 
 jobs:
@@ -18,40 +20,36 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          cache: true
+          channel: stable
+          cache: false
 
       - name: Flutter doctor
         run: flutter doctor -v
 
-      # This repo intentionally ships without /android (see .gitignore) so
-      # the scaffold stays platform-folder-free in source control. CI
-      # generates a fresh Android project skeleton and drops our lib/ and
-      # pubspec.yaml on top of it, then builds.
       - name: Generate Android platform folder
         run: flutter create --platforms=android --org com.wirdi --project-name wirdi .
 
-      - name: Verify Android project was generated
+      - name: Clear Flutter Cache
         run: |
-          echo "Contents of android/app:"
-          ls -la android/app || (echo "::error::android/app was not created by 'flutter create'" && exit 1)
-          if [ ! -f android/app/build.gradle ] && [ ! -f android/app/build.gradle.kts ]; then
-            echo "::error::Neither build.gradle nor build.gradle.kts exists under android/app"
-            exit 1
-          fi
-          echo "Found:"
-          ls android/app/build.gradle* 2>/dev/null || true
+          flutter pub cache clean --force || true
+
+      - name: Remove Old Lock File
+        run: |
+          rm -f pubspec.lock
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze (non-blocking for the test build)
+      - name: Show Dependencies
+        run: flutter pub deps
+
+      - name: Analyze
         run: flutter analyze || true
 
       - name: Build debug APK
