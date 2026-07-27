@@ -7,21 +7,6 @@ class AppSources {
   static const String azkarJsonUrl =
       'https://raw.githubusercontent.com/YousefAsalya/Islamic-Pro-azkar-API/main/data/ar.json';
 
-  static const String everyAyahBaseUrl =
-      'https://everyayah.com/data';
-
-  static const String defaultReciterFolder =
-      'Alafasy_64kbps';
-
-  static String ayahAudioUrl({
-    required int surahNumber,
-    required int ayahNumber,
-  }) {
-    final surah = surahNumber.toString().padLeft(3, '0');
-    final ayah = ayahNumber.toString().padLeft(3, '0');
-    return '$everyAyahBaseUrl/$defaultReciterFolder/$surah$ayah.mp3';
-  }
-
   static String prayerTimesUrl({
     required double latitude,
     required double longitude,
@@ -39,10 +24,6 @@ https://github.com/risan/quran-json
 مصدر نص القرآن:
 Tanzil Project
 https://tanzil.net
-
-صوت القرآن:
-EveryAyah
-https://everyayah.com
 
 الأذكار:
 Hisn Al-Muslim / Islamic Pro Azkar API
