@@ -1,144 +1,109 @@
 import 'package:flutter/material.dart';
-import 'package:adhan/adhan.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../core/theme/app_theme.dart';
 
-class PrayerTimesScreen extends StatefulWidget {
+class PrayerTimesScreen extends StatelessWidget {
   const PrayerTimesScreen({super.key});
 
   @override
-  State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
+  Widget build(BuildContext context) {
+    final prayers = [
+      {
+        "name": "الفجر",
+        "time": "04:32",
+      },
+      {
+        "name": "الظهر",
+        "time": "12:14",
+      },
+      {
+        "name": "العصر",
+        "time": "15:47",
+        "next": true,
+      },
+      {
+        "name": "المغرب",
+        "time": "19:02",
+      },
+      {
+        "name": "العشاء",
+        "time": "20:31",
+      },
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('مواقيت الصلاة'),
+        centerTitle: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  AppColors.primaryEmerald,
+                  Color(0xFF115E56),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Column(
+              children: [
+                Text(
+                  'العصر',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  '01:42:10',
+                  style: TextStyle(
+                    color: AppColors.goldAccent,
+                    fontSize: 22,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'الوقت المتبقي',
+                  style: TextStyle(
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...prayers.map(
+            (p) => Card(
+              child: ListTile(
+                leading: Icon(
+                  Icons.mosque_outlined,
+                  color: p["next"] == true
+                      ? AppColors.primaryEmerald
+                      : AppColors.mutedText,
+                ),
+                title: Text(
+                  p["name"] as String,
+                ),
+                trailing: Text(
+                  p["time"] as String,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: p["next"] == true
+                        ? AppColors.primaryEmerald
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
-
-class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
-  bool _loading = true;
-
-  String _city = "موقعي الحالي";
-
-  final List<_PrayerItem> _prayers = [];
-
-  String _nextPrayer = "...";
-
-  String _countDown = "...";
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPrayerTimes();
-  }
-
-  Future<void> _loadPrayerTimes() async {
-    try {
-      final position =
-          await Geolocator.getCurrentPosition();
-
-      final coordinates = Coordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      final params =
-          CalculationMethod.egyptian.getParameters();
-
-      final date = DateComponents.from(
-        DateTime.now(),
-      );
-
-      final prayerTimes = PrayerTimes(
-        coordinates,
-        date,
-        params,
-      );
-
-      final prayers = [
-        _PrayerItem(
-          "الفجر",
-          _format(prayerTimes.fajr),
-        ),
-        _PrayerItem(
-          "الظهر",
-          _format(prayerTimes.dhuhr),
-        ),
-        _PrayerItem(
-          "العصر",
-          _format(prayerTimes.asr),
-        ),
-        _PrayerItem(
-          "المغرب",
-          _format(prayerTimes.maghrib),
-        ),
-        _PrayerItem(
-          "العشاء",
-          _format(prayerTimes.isha),
-        ),
-      ];
-
-      Prayer? next =
-          prayerTimes.nextPrayer();
-
-      String nextName = "لا يوجد";
-
-      DateTime? nextTime;
-
-      if (next == Prayer.fajr) {
-        nextName = "الفجر";
-        nextTime = prayerTimes.fajr;
-      }
-
-      if (next == Prayer.dhuhr) {
-        nextName = "الظهر";
-        nextTime = prayerTimes.dhuhr;
-      }
-
-      if (next == Prayer.asr) {
-        nextName = "العصر";
-        nextTime = prayerTimes.asr;
-      }
-
-      if (next == Prayer.maghrib) {
-        nextName = "المغرب";
-        nextTime = prayerTimes.maghrib;
-      }
-
-      if (next == Prayer.isha) {
-        nextName = "العشاء";
-        nextTime = prayerTimes.isha;
-      }
-
-      final remain =
-          nextTime!.difference(DateTime.now());
-
-      final h =
-          remain.inHours.toString().padLeft(2, "0");
-
-      final m = (remain.inMinutes % 60)
-          .toString()
-          .padLeft(2, "0");
-
-      final s = (remain.inSeconds % 60)
-          .toString()
-          .padLeft(2, "0");
-
-      setState(() {
-        _prayers.clear();
-        _prayers.addAll(prayers);
-
-        _nextPrayer = nextName;
-
-        _countDown = "$h:$m:$s";
-
-        _loading = false;
-      });
-    } catch (_) {
-      setState(() {
-        _loading = false;
-      });
-    }
-  }
-
-  String _format(DateTime date) {
-    final hh =
-        date.hour.toString().padLeft(2, '0');
-
-    final mm =
-        date.minute.
