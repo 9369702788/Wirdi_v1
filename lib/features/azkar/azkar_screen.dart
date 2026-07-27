@@ -20,10 +20,6 @@ class _AzkarScreenState extends State<AzkarScreen> {
             "اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور",
         "count": 1
       },
-      {
-        "text": "سبحان الله وبحمده",
-        "count": 100
-      },
     ],
     "أذكار المساء": [
       {
@@ -31,27 +27,11 @@ class _AzkarScreenState extends State<AzkarScreen> {
             "أمسينا وأمسى الملك لله والحمد لله لا إله إلا الله وحده لا شريك له",
         "count": 1
       },
-      {
-        "text":
-            "اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير",
-        "count": 1
-      },
-      {
-        "text":
-            "أعوذ بكلمات الله التامات من شر ما خلق",
-        "count": 3
-      },
     ],
     "أذكار النوم": [
       {
-        "text":
-            "باسمك اللهم أموت وأحيا",
+        "text": "باسمك اللهم أموت وأحيا",
         "count": 1
-      },
-      {
-        "text":
-            "اللهم قني عذابك يوم تبعث عبادك",
-        "count": 3
       },
     ],
     "أذكار الاستيقاظ": [
@@ -62,15 +42,6 @@ class _AzkarScreenState extends State<AzkarScreen> {
       },
     ],
     "أذكار بعد الصلاة": [
-      {
-        "text": "أستغفر الله",
-        "count": 3
-      },
-      {
-        "text":
-            "اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام",
-        "count": 1
-      },
       {
         "text": "سبحان الله",
         "count": 33
@@ -93,7 +64,6 @@ class _AzkarScreenState extends State<AzkarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("الأذكار"),
-        centerTitle: true,
       ),
       body: ListView.builder(
         itemCount: categories.length,
@@ -103,11 +73,7 @@ class _AzkarScreenState extends State<AzkarScreen> {
           return Card(
             margin: const EdgeInsets.all(10),
             child: ListTile(
-              leading: const Icon(Icons.favorite_outline),
-              title: Text(
-                category,
-                textAlign: TextAlign.right,
-              ),
+              title: Text(category),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
                 Navigator.push(
@@ -152,7 +118,6 @@ class _AzkarDetailsScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        centerTitle: true,
       ),
       body: ListView.builder(
         itemCount: widget.items.length,
@@ -170,14 +135,35 @@ class _AzkarDetailsScreenState
                 children: [
                   Text(
                     zekr["text"],
-                    textAlign: TextAlign.right,
                     textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
                     style: const TextStyle(
-                      fontSize: 22,
-                      height: 1.8,
+                      fontSize: 20,
                     ),
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 12),
                   Text(
                     "$current / $target",
-     
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        counters[index] = current + 1;
+                      });
+                    },
+                    child: const Text("تسبيح"),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
