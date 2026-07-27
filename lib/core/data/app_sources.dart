@@ -1,4 +1,6 @@
 class AppSources {
+  AppSources._();
+
   static const String quranJsonUrl =
       'https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json';
 
@@ -8,27 +10,51 @@ class AppSources {
   static const String everyAyahBaseUrl =
       'https://everyayah.com/data';
 
-  static const String defaultReciter =
+  static const String defaultReciterFolder =
       'Alafasy_64kbps';
 
-  static String getAyahAudio({
-    required int surah,
-    required int ayah,
+  static String ayahAudioUrl({
+    required int surahNumber,
+    required int ayahNumber,
   }) {
-    final s = surah.toString().padLeft(3, '0');
-    final a = ayah.toString().padLeft(3, '0');
-
-    return '$everyAyahBaseUrl/$defaultReciter/$s$a.mp3';
+    final surah = surahNumber.toString().padLeft(3, '0');
+    final ayah = ayahNumber.toString().padLeft(3, '0');
+    return '$everyAyahBaseUrl/$defaultReciterFolder/$surah$ayah.mp3';
   }
 
-  static const String licenses = '''
-Quran Text:
+  static String prayerTimesUrl({
+    required double latitude,
+    required double longitude,
+  }) {
+    return 'https://api.aladhan.com/v1/timings?latitude=$latitude&longitude=$longitude&method=5';
+  }
+
+  static const String sourcesAndLicenses = '''
+المصادر والتراخيص
+
+نص القرآن الكريم:
+Quran JSON
+https://github.com/risan/quran-json
+
+مصدر نص القرآن:
 Tanzil Project
+https://tanzil.net
 
-Audio:
+صوت القرآن:
 EveryAyah
+https://everyayah.com
 
-Azkar:
-Hisn Al Muslim
+الأذكار:
+Hisn Al-Muslim / Islamic Pro Azkar API
+https://github.com/YousefAsalya/Islamic-Pro-azkar-API
+
+مواقيت الصلاة:
+AlAdhan Prayer Times API
+https://aladhan.com/prayer-times-api
+
+ملاحظات مهمة:
+- يجب عدم تعديل نص القرآن الكريم.
+- يجب ذكر مصدر Tanzil داخل صفحة المصادر والتراخيص.
+- مواقيت الصلاة قد تختلف عن توقيت المسجد المحلي إذا كانت هناك تعديلات محلية.
 ''';
 }
